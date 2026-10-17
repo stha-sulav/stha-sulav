@@ -1,0 +1,40 @@
+name: Update Pac-Man Contribution Graph
+
+on:
+  # Refresh daily. GitHub scheduled workflows use UTC.
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/update-pacman.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-pacman-contribution-graph
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Generate Pac-Man contribution SVGs
+        uses: abozanona/pacman-contribution-graph@main
+        with:
+          github_user_name: stha-sulav
+          games: "pacman"
+          hide_month_labels: "false"
+
+      - name: Publish generated SVGs to output branch
+        uses: crazy-max/ghaction-github-pages@v3.1.0
+        with:
+          target_branch: output
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
